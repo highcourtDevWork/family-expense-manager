@@ -10,9 +10,33 @@
     <body class="min-h-screen bg-gray-50 font-sans antialiased">
         <nav class="border-b border-gray-200 bg-white">
             <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                <a href="{{ route('dashboard') }}">
-                    <x-application-logo class="text-base" />
-                </a>
+                <div class="flex items-center gap-8">
+                    <a href="{{ route('dashboard') }}">
+                        <x-application-logo class="text-base" />
+                    </a>
+
+                    <div class="hidden items-center gap-1 sm:flex">
+                        @php
+                            // route name => [label, active-pattern]
+                            $navLinks = [
+                                'dashboard' => ['Dashboard', 'dashboard'],
+                                'expenses.index' => ['Expenses', 'expenses.*'],
+                                'incomes.index' => ['Income', 'incomes.*'],
+                                'family.index' => ['Family', 'family.*'],
+                            ];
+                        @endphp
+                        @foreach ($navLinks as $route => [$label, $pattern])
+                            <a href="{{ route($route) }}"
+                                @class([
+                                    'rounded-lg px-3 py-2 text-sm font-medium',
+                                    'bg-emerald-50 text-emerald-700' => request()->routeIs($pattern),
+                                    'text-gray-600 hover:text-emerald-700' => ! request()->routeIs($pattern),
+                                ])>
+                                {{ $label }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
 
                 <div class="flex items-center gap-4">
                     <span class="hidden text-sm text-gray-600 sm:inline">{{ auth()->user()->name }}</span>
