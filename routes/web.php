@@ -4,7 +4,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\FamilyMemberController;
 use App\Http\Controllers\IncomeController;
+use App\Http\Controllers\LoanController;
+use App\Http\Controllers\LoanPaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,6 +24,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/incomes/report', [IncomeController::class, 'report'])->name('incomes.report');
     Route::resource('incomes', IncomeController::class)->except('show');
 
+    // Loans and their nested repayments.
+    Route::resource('loans', LoanController::class);
+    Route::post('/loans/{loan}/payments', [LoanPaymentController::class, 'store'])->name('loans.payments.store');
+    Route::delete('/loans/{loan}/payments/{payment}', [LoanPaymentController::class, 'destroy'])->name('loans.payments.destroy');
+
     // Family member management. Named "family.*" for readable URLs (/family),
     // while the {family_member} parameter drives implicit model binding.
     Route::get('/family', [FamilyMemberController::class, 'index'])->name('family.index');
@@ -29,6 +37,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/family/{family_member}/edit', [FamilyMemberController::class, 'edit'])->name('family.edit');
     Route::put('/family/{family_member}', [FamilyMemberController::class, 'update'])->name('family.update');
     Route::delete('/family/{family_member}', [FamilyMemberController::class, 'destroy'])->name('family.destroy');
+
+    // Reports. The monthly financial report is exportable as a PDF (TCPDF).
+    Route::get('/reports/monthly/pdf', [ReportController::class, 'monthlyPdf'])->name('reports.monthly.pdf');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

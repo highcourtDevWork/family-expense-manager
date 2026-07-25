@@ -14,15 +14,7 @@
         </div>
     </x-slot>
 
-    @if (session('status'))
-        <div class="mb-4 rounded-lg bg-emerald-50 p-3 text-sm font-medium text-emerald-700">
-            @switch(session('status'))
-                @case('member-added') Family member added successfully. @break
-                @case('member-updated') Family member updated successfully. @break
-                @case('member-removed') Family member removed. @break
-            @endswitch
-        </div>
-    @endif
+    <x-flash />
 
     <x-input-error class="mb-4" :messages="$errors->get('member')" />
 

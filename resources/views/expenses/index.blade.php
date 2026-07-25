@@ -9,15 +9,7 @@
         </div>
     </x-slot>
 
-    @if (session('status'))
-        <div class="mb-4 rounded-lg bg-emerald-50 p-3 text-sm font-medium text-emerald-700">
-            @switch(session('status'))
-                @case('expense-created') Expense added successfully. @break
-                @case('expense-updated') Expense updated successfully. @break
-                @case('expense-deleted') Expense deleted successfully. @break
-            @endswitch
-        </div>
-    @endif
+    <x-flash />
 
     {{-- Filter / search bar --}}
     <form method="GET" action="{{ route('expenses.index') }}"

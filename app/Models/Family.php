@@ -65,4 +65,9 @@ class Family extends Model
     {
         return $this->hasMany(Income::class);
     }
+
+    public function loans(): HasMany
+    {
+        return $this->hasMany(Loan::class);
+    }
 }

@@ -15,15 +15,7 @@
         </div>
     </x-slot>
 
-    @if (session('status'))
-        <div class="mb-4 rounded-lg bg-emerald-50 p-3 text-sm font-medium text-emerald-700">
-            @switch(session('status'))
-                @case('income-created') Income added successfully. @break
-                @case('income-updated') Income updated successfully. @break
-                @case('income-deleted') Income deleted successfully. @break
-            @endswitch
-        </div>
-    @endif
+    <x-flash />
 
     {{-- Filter / search bar --}}
     <form method="GET" action="{{ route('incomes.index') }}"
