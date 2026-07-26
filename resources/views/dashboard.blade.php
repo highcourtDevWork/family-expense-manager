@@ -13,12 +13,17 @@
     </x-slot>
 
     {{-- Summary cards --}}
-    @php $balance = (float) $summary['balance']; @endphp
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    @php
+        $balance = (float) $summary['balance'];
+        $debtOwed = (float) $summary['debtOwed'];
+    @endphp
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <x-stat-card label="This Month Income" :value="$summary['income']" tone="emerald" icon="arrow-down" />
         <x-stat-card label="This Month Expense" :value="$summary['expense']" tone="red" icon="arrow-up" />
         <x-stat-card label="Balance" :value="$summary['balance']" :tone="$balance >= 0 ? 'emerald' : 'red'" icon="scale" />
         <x-stat-card label="Total Loan Balance" :value="$summary['loanBalance']" tone="amber" icon="bank" :href="route('loans.index')" />
+        <x-stat-card label="Net Debt (owed)" :value="$summary['debtOwed']" :tone="$debtOwed > 0 ? 'red' : 'emerald'" icon="scale" :href="route('debts.index')" />
+        <x-stat-card label="Total Savings" :value="$summary['savings']" tone="emerald" icon="bank" :href="route('savings.index')" />
     </div>
 
     {{-- Charts --}}

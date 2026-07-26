@@ -32,6 +32,24 @@
     </tr>
 </table>
 
+{{-- Savings / loans / debts snapshot --}}
+<table cellpadding="6" cellspacing="0" style="width:100%; margin-top:6px;">
+    <tr>
+        <td style="width:33%; border:1px solid #e5e7eb;">
+            <span style="font-size:9px; color:#6b7280;">SAVINGS (THIS MONTH)</span><br>
+            <span style="font-size:13px; color:#047857;"><b>{{ $money($report['savings']) }}</b></span>
+        </td>
+        <td style="width:33%; border:1px solid #e5e7eb;">
+            <span style="font-size:9px; color:#6b7280;">LOAN BALANCE</span><br>
+            <span style="font-size:13px; color:#b45309;"><b>{{ $money($report['loanBalance']) }}</b></span>
+        </td>
+        <td style="width:34%; border:1px solid #e5e7eb;">
+            <span style="font-size:9px; color:#6b7280;">NET DEBT (OWED)</span><br>
+            <span style="font-size:13px; color:#b45309;"><b>{{ $money($report['debtOwed']) }}</b></span>
+        </td>
+    </tr>
+</table>
+
 {{-- Income by source --}}
 <h3 style="font-size:12px; color:#374151; margin-top:14px;">Income by Source</h3>
 <table cellpadding="5" cellspacing="0" style="width:100%; border:1px solid #e5e7eb;">

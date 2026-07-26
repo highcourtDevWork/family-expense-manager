@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Enums\DebtType;
+use App\Models\Debt;
 use App\Models\Expense;
 use App\Models\Family;
 use App\Models\Income;
 use App\Models\Loan;
+use App\Models\Saving;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -34,6 +37,8 @@ class DashboardService
             'expense' => (string) $expense,
             'balance' => (string) ((float) $income - (float) $expense),
             'loanBalance' => $this->totalLoanBalance($family),
+            'debtOwed' => $this->netDebtOwed($family),
+            'savings' => $this->totalSavings($family),
             'month' => $month->copy(),
         ];
     }
@@ -45,6 +50,30 @@ class DashboardService
     public function totalLoanBalance(Family $family): string
     {
         return (string) Loan::query()->forFamily($family->id)->sum('remaining_amount');
+    }
+
+    /**
+     * Net amount the family owes: what it still owes on "borrowed" debts minus
+     * what is still owed back to it on "lent" debts. Negative means others owe
+     * the family more than it owes them.
+     */
+    public function netDebtOwed(Family $family): string
+    {
+        $borrowed = (float) Debt::query()->forFamily($family->id)
+            ->where('debt_type', DebtType::Borrowed)->sum('balance_amount');
+
+        $lent = (float) Debt::query()->forFamily($family->id)
+            ->where('debt_type', DebtType::Lent)->sum('balance_amount');
+
+        return (string) ($borrowed - $lent);
+    }
+
+    /**
+     * Total of all recorded savings for the family.
+     */
+    public function totalSavings(Family $family): string
+    {
+        return (string) Saving::query()->forFamily($family->id)->sum('amount');
     }
 
     /**

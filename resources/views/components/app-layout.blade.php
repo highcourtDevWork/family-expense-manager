@@ -15,8 +15,12 @@
                 'expenses.index' => ['Expenses', 'expenses', 'expenses.*'],
                 'incomes.index' => ['Income', 'income', 'incomes.*'],
                 'loans.index' => ['Loans', 'loans', 'loans.*'],
+                'debts.index' => ['Debts', 'debts', 'debts.*'],
+                'savings.index' => ['Savings', 'savings', 'savings.*'],
                 'family.index' => ['Family', 'family', 'family.*'],
+                'reports.index' => ['Reports', 'reports', 'reports.*'],
                 'imports.create' => ['Import', 'import', 'imports.*'],
+                'settings.index' => ['Settings', 'settings', 'settings.*'],
             ];
         @endphp
 
@@ -49,6 +53,19 @@
                 </nav>
 
                 <div class="border-t border-gray-200 p-4">
+                    @php $unread = auth()->user()->unreadNotifications()->count(); @endphp
+                    <a href="{{ route('notifications.index') }}"
+                        class="mb-1 flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                        <span class="flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9" />
+                            </svg>
+                            Notifications
+                        </span>
+                        @if ($unread > 0)
+                            <span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-semibold text-white">{{ $unread }}</span>
+                        @endif
+                    </a>
                     <a href="{{ route('profile.edit') }}"
                         class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
                         <span class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
