@@ -11,6 +11,7 @@
         'income' => 'M12 3v14m0 0l-5-5m5 5l5-5M5 21h14',
         'loans' => 'M3 10l9-6 9 6M4 10v9h16v-9M9 19v-5h6v5',
         'family' => 'M17 20h5v-1a4 4 0 0 0-3-3.87M9 20H4v-1a4 4 0 0 1 3-3.87m6-1a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+        'import' => 'M12 15V3m0 12l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2',
     ];
     $path = $icon ? ($icons[$icon] ?? null) : null;
 @endphp

@@ -16,6 +16,7 @@
                 'incomes.index' => ['Income', 'income', 'incomes.*'],
                 'loans.index' => ['Loans', 'loans', 'loans.*'],
                 'family.index' => ['Family', 'family', 'family.*'],
+                'imports.create' => ['Import', 'import', 'imports.*'],
             ];
         @endphp
 

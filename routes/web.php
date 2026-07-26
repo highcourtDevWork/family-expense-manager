@@ -8,6 +8,7 @@ use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LoanPaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\StatementImportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -28,6 +29,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('loans', LoanController::class);
     Route::post('/loans/{loan}/payments', [LoanPaymentController::class, 'store'])->name('loans.payments.store');
     Route::delete('/loans/{loan}/payments/{payment}', [LoanPaymentController::class, 'destroy'])->name('loans.payments.destroy');
+
+    // Google Pay statement import: upload -> preview -> confirm.
+    Route::get('/imports/gpay', [StatementImportController::class, 'create'])->name('imports.create');
+    Route::post('/imports/gpay', [StatementImportController::class, 'preview'])->name('imports.parse');
+    Route::get('/imports/gpay/preview', [StatementImportController::class, 'showPreview'])->name('imports.preview');
+    Route::post('/imports/gpay/confirm', [StatementImportController::class, 'confirm'])->name('imports.confirm');
 
     // Family member management. Named "family.*" for readable URLs (/family),
     // while the {family_member} parameter drives implicit model binding.

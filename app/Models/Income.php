@@ -21,6 +21,7 @@ class Income extends Model
         'income_date',
         'amount',
         'notes',
+        'reference',
     ];
 
     /**

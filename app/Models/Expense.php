@@ -24,6 +24,7 @@ class Expense extends Model
         'payment_method',
         'description',
         'attachment_path',
+        'reference',
     ];
 
     /**
