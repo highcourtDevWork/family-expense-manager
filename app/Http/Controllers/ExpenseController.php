@@ -95,4 +95,32 @@ class ExpenseController extends Controller
         return redirect()->route('expenses.index')
             ->with('status', 'expense-deleted');
     }
+
+    /**
+     * Delete several selected expenses at once. Every id is scoped to the
+     * current family and then filtered through the delete policy, so a user can
+     * only ever remove rows they are actually allowed to.
+     */
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $this->authorize('viewAny', Expense::class);
+
+        $validated = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $family = $request->user()->currentFamily();
+
+        $deletable = Expense::query()
+            ->forFamily($family->id)
+            ->whereIn('id', $validated['ids'])
+            ->get()
+            ->filter(fn (Expense $expense) => $request->user()->can('delete', $expense));
+
+        $count = $this->expenseService->deleteMany($deletable->values());
+
+        return redirect()->route('expenses.index')
+            ->with('status', $count === 1 ? '1 expense deleted.' : "{$count} expenses deleted.");
+    }
 }

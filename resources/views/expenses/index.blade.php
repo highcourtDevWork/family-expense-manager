@@ -2,10 +2,16 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold text-gray-800">Expenses</h2>
-            <a href="{{ route('expenses.create') }}"
-                class="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
-                + Add Expense
-            </a>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('recurring.index') }}"
+                    class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                    Recurring
+                </a>
+                <a href="{{ route('expenses.create') }}"
+                    class="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                    + Add Expense
+                </a>
+            </div>
         </div>
     </x-slot>
 
@@ -78,12 +84,41 @@
     </form>
 
     {{-- Expense table --}}
-    <div class="overflow-hidden rounded-lg bg-white shadow-sm">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    <tr>
-                        <th class="px-4 py-3">Date</th>
+    @php $deletableIds = $expenses->filter(fn ($e) => auth()->user()->can('delete', $e))->pluck('id')->values(); @endphp
+    <div x-data="{ selected: [], allIds: @js($deletableIds) }">
+        {{-- Bulk action bar (only appears once rows are selected) --}}
+        <div x-show="selected.length > 0" x-cloak
+            class="mb-3 flex items-center justify-between rounded-lg border border-red-100 bg-red-50 px-4 py-2">
+            <span class="text-sm font-medium text-red-800"><span x-text="selected.length"></span> selected</span>
+            <div class="flex items-center gap-3">
+                <button type="button" @click="selected = []" class="text-sm text-gray-600 hover:text-gray-800">Clear</button>
+                <form method="POST" action="{{ route('expenses.bulk-delete') }}"
+                    onsubmit="return confirm('Delete the selected expenses?');">
+                    @csrf
+                    @method('DELETE')
+                    <template x-for="id in selected" :key="id">
+                        <input type="hidden" name="ids[]" :value="id">
+                    </template>
+                    <button type="submit" class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700">
+                        Delete selected
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="overflow-hidden rounded-lg bg-white shadow-sm">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        <tr>
+                            <th class="w-10 px-4 py-3">
+                                <input type="checkbox" aria-label="Select all"
+                                    :disabled="allIds.length === 0"
+                                    :checked="allIds.length > 0 && selected.length === allIds.length"
+                                    @change="selected = $event.target.checked ? [...allIds] : []"
+                                    class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
+                            </th>
+                            <th class="px-4 py-3">Date</th>
                         <th class="px-4 py-3">Category</th>
                         <th class="px-4 py-3">Member</th>
                         <th class="px-4 py-3">Payment</th>
@@ -95,6 +130,13 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($expenses as $expense)
                         <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">
+                                @can('delete', $expense)
+                                    <input type="checkbox" value="{{ $expense->id }}" x-model.number="selected"
+                                        aria-label="Select expense"
+                                        class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
+                                @endcan
+                            </td>
                             <td class="whitespace-nowrap px-4 py-3 text-gray-700">
                                 {{ $expense->expense_date->format('d M Y') }}
                             </td>
@@ -133,7 +175,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-10 text-center text-gray-500">
+                            <td colspan="8" class="px-4 py-10 text-center text-gray-500">
                                 No expenses found. <a href="{{ route('expenses.create') }}"
                                     class="text-emerald-700 underline">Add your first one</a>.
                             </td>
@@ -141,6 +183,7 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 

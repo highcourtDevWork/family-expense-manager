@@ -6,6 +6,7 @@ use App\Enums\LoanType;
 use App\Http\Requests\Loan\StoreLoanRequest;
 use App\Http\Requests\Loan\UpdateLoanRequest;
 use App\Models\Loan;
+use App\Services\EmiService;
 use App\Services\LoanService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +16,7 @@ class LoanController extends Controller
 {
     public function __construct(
         private readonly LoanService $loanService,
+        private readonly EmiService $emiService,
     ) {}
 
     public function index(Request $request): View
@@ -46,6 +48,9 @@ class LoanController extends Controller
             $request->validated(),
         );
 
+        // Build the amortization schedule for EMI loans up front.
+        $this->emiService->generateSchedule($loan);
+
         return redirect()->route('loans.show', $loan)
             ->with('status', 'loan-created');
     }
@@ -54,9 +59,13 @@ class LoanController extends Controller
     {
         $this->authorize('view', $loan);
 
+        $loan->load('user');
+
         return view('loans.show', [
-            'loan' => $loan->load('user'),
-            'payments' => $loan->payments()->latest('payment_date')->latest('id')->get(),
+            'loan' => $loan,
+            'payments' => $loan->is_emi ? collect() : $loan->payments()->latest('payment_date')->latest('id')->get(),
+            'emis' => $loan->is_emi ? $loan->emis()->get() : collect(),
+            'emiStats' => $loan->is_emi ? $this->emiService->stats($loan) : null,
         ]);
     }
 
@@ -73,6 +82,9 @@ class LoanController extends Controller
     public function update(UpdateLoanRequest $request, Loan $loan): RedirectResponse
     {
         $this->loanService->update($loan, $request->validated());
+
+        // Rebuild the schedule if EMI config changed (no-op once repayment began).
+        $this->emiService->generateSchedule($loan->refresh());
 
         return redirect()->route('loans.show', $loan)
             ->with('status', 'loan-updated');

@@ -9,6 +9,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 class ExpenseService
@@ -151,6 +152,22 @@ class ExpenseService
     public function delete(Expense $expense): void
     {
         $expense->delete();
+    }
+
+    /**
+     * Soft-delete several expenses in a single query. The caller is responsible
+     * for having already authorised each one.
+     *
+     * @param  Collection<int, Expense>  $expenses
+     * @return int number of rows deleted
+     */
+    public function deleteMany(Collection $expenses): int
+    {
+        if ($expenses->isEmpty()) {
+            return 0;
+        }
+
+        return Expense::query()->whereKey($expenses->modelKeys())->delete();
     }
 
     /**

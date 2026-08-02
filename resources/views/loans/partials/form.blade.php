@@ -5,7 +5,10 @@
       $loan       - Loan|null (null when creating)
       $loanTypes  - array<string, string> value => label
 --}}
-<form method="POST" action="{{ $action }}" class="space-y-6">
+@php $emiLocked = $loan && $loan->is_emi && $loan->emis()->where('status', \App\Enums\EmiStatus::Paid)->exists(); @endphp
+
+<form method="POST" action="{{ $action }}" class="space-y-6"
+    x-data="{ isEmi: {{ old('is_emi', $loan?->is_emi) ? 'true' : 'false' }} }">
     @csrf
     @if ($method !== 'POST')
         @method($method)
@@ -30,15 +33,10 @@
         </div>
 
         <div>
-            <x-input-label for="total_amount" value="Total Loan Amount (₹)" />
+            <x-input-label for="total_amount" value="Total Loan Amount / Principal (₹)" />
             <x-text-input id="total_amount" name="total_amount" type="number" step="0.01" min="0.01" class="mt-1"
                 value="{{ old('total_amount', $loan?->total_amount) }}" required />
             <x-input-error class="mt-2" :messages="$errors->get('total_amount')" />
-            @if ($loan && (float) $loan->paid_amount > 0)
-                <p class="mt-1 text-xs text-gray-500">
-                    ₹{{ number_format((float) $loan->paid_amount, 2) }} already repaid — balances recalculate on save.
-                </p>
-            @endif
         </div>
 
         <div>
@@ -53,6 +51,49 @@
             <x-text-input id="end_date" name="end_date" type="date" class="mt-1"
                 value="{{ old('end_date', $loan?->end_date?->format('Y-m-d')) }}" />
             <x-input-error class="mt-2" :messages="$errors->get('end_date')" />
+        </div>
+    </div>
+
+    {{-- EMI configuration --}}
+    <div class="rounded-lg border border-gray-200 p-4">
+        <label class="flex items-center gap-2">
+            <input type="checkbox" name="is_emi" value="1" x-model="isEmi" @disabled($emiLocked)
+                class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
+            <span class="text-sm font-medium text-gray-700">EMI-based loan (fixed monthly installments)</span>
+        </label>
+
+        @if ($emiLocked)
+            <p class="mt-2 text-xs text-amber-600">Repayment has started — the EMI schedule is locked and can't be changed.</p>
+        @endif
+
+        <div x-show="isEmi" x-cloak class="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+                <x-input-label for="tenure_months" value="Tenure (months)" />
+                <x-text-input id="tenure_months" name="tenure_months" type="number" min="1" max="600" class="mt-1"
+                    :disabled="$emiLocked" value="{{ old('tenure_months', $loan?->tenure_months) }}" />
+                <x-input-error class="mt-2" :messages="$errors->get('tenure_months')" />
+            </div>
+
+            <div>
+                <x-input-label for="interest_rate" value="Interest Rate (% per year)" />
+                <x-text-input id="interest_rate" name="interest_rate" type="number" step="0.01" min="0" max="100" class="mt-1"
+                    :disabled="$emiLocked" value="{{ old('interest_rate', $loan?->interest_rate) }}" />
+                <x-input-error class="mt-2" :messages="$errors->get('interest_rate')" />
+            </div>
+
+            <div>
+                <x-input-label for="emi_amount" value="Monthly EMI (₹) — leave blank to auto-calculate" />
+                <x-text-input id="emi_amount" name="emi_amount" type="number" step="0.01" min="0.01" class="mt-1"
+                    :disabled="$emiLocked" value="{{ old('emi_amount', $loan?->emi_amount) }}" />
+                <x-input-error class="mt-2" :messages="$errors->get('emi_amount')" />
+            </div>
+
+            <div>
+                <x-input-label for="emi_due_day" value="EMI Due Day (1–28)" />
+                <x-text-input id="emi_due_day" name="emi_due_day" type="number" min="1" max="28" class="mt-1"
+                    :disabled="$emiLocked" value="{{ old('emi_due_day', $loan?->emi_due_day) }}" />
+                <x-input-error class="mt-2" :messages="$errors->get('emi_due_day')" />
+            </div>
         </div>
     </div>
 

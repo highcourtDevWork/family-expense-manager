@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\EmiStatus;
 use App\Enums\LoanStatus;
 use App\Models\Family;
 use App\Models\Loan;
@@ -82,6 +83,13 @@ class LoanService
      */
     public function recalculate(Loan $loan): Loan
     {
+        // EMI loans derive their outstanding principal from the schedule; manual
+        // loans from their ad-hoc payments. Either way remaining_amount tracks
+        // the outstanding principal so the dashboard total stays consistent.
+        if ($loan->is_emi) {
+            return $this->recalculateEmi($loan);
+        }
+
         $paid = (float) $loan->payments()->sum('amount');
         $remaining = max((float) $loan->total_amount - $paid, 0);
 
@@ -89,6 +97,27 @@ class LoanService
             'paid_amount' => $paid,
             'remaining_amount' => $remaining,
             'status' => $remaining <= 0 ? LoanStatus::Closed : LoanStatus::Active,
+        ]);
+
+        return $loan;
+    }
+
+    /**
+     * Outstanding principal for an EMI loan = total principal minus the
+     * principal already repaid via paid installments. The loan closes once
+     * every installment is paid.
+     */
+    private function recalculateEmi(Loan $loan): Loan
+    {
+        $paidPrincipal = (float) $loan->emis()->where('status', EmiStatus::Paid)->sum('principal_component');
+        $remaining = max((float) $loan->total_amount - $paidPrincipal, 0);
+        $hasSchedule = $loan->emis()->exists();
+        $allPaid = $hasSchedule && ! $loan->emis()->where('status', EmiStatus::Pending)->exists();
+
+        $loan->update([
+            'paid_amount' => $paidPrincipal,
+            'remaining_amount' => $remaining,
+            'status' => $allPaid ? LoanStatus::Closed : LoanStatus::Active,
         ]);
 
         return $loan;

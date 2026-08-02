@@ -22,6 +22,11 @@ class Loan extends Model
         'user_id',
         'loan_name',
         'loan_type',
+        'is_emi',
+        'tenure_months',
+        'emi_amount',
+        'emi_due_day',
+        'interest_rate',
         'total_amount',
         'paid_amount',
         'remaining_amount',
@@ -38,6 +43,11 @@ class Loan extends Model
         return [
             'loan_type' => LoanType::class,
             'status' => LoanStatus::class,
+            'is_emi' => 'boolean',
+            'tenure_months' => 'integer',
+            'emi_due_day' => 'integer',
+            'emi_amount' => 'decimal:2',
+            'interest_rate' => 'decimal:2',
             'total_amount' => 'decimal:2',
             'paid_amount' => 'decimal:2',
             'remaining_amount' => 'decimal:2',
@@ -59,6 +69,14 @@ class Loan extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(LoanPayment::class);
+    }
+
+    /**
+     * The amortization schedule (EMI installments), earliest first.
+     */
+    public function emis(): HasMany
+    {
+        return $this->hasMany(LoanEmi::class)->orderBy('sequence');
     }
 
     /**

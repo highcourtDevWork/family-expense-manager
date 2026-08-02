@@ -12,6 +12,7 @@ use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LoanPaymentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RecurringExpenseController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SavingController;
 use App\Http\Controllers\SettingsController;
@@ -25,6 +26,9 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
+    // Bulk delete is declared before the resource so its static path is never
+    // mistaken for /expenses/{expense}.
+    Route::delete('/expenses/bulk-delete', [ExpenseController::class, 'bulkDestroy'])->name('expenses.bulk-delete');
     Route::resource('expenses', ExpenseController::class)->except('show');
 
     // Monthly report is declared before the resource so its static /incomes/report
@@ -44,6 +48,10 @@ Route::middleware('auth')->group(function () {
 
     // Savings (single-record CRUD, no payments).
     Route::resource('savings', SavingController::class)->except('show')->parameters(['savings' => 'saving']);
+
+    // Recurring expense templates + the one-click "add to this month" action.
+    Route::resource('recurring', RecurringExpenseController::class)->except('show')->parameters(['recurring' => 'recurring']);
+    Route::post('/recurring/{recurring}/post', [RecurringExpenseController::class, 'post'])->name('recurring.post');
 
     // Google Pay statement import: upload -> preview -> confirm.
     Route::get('/imports/gpay', [StatementImportController::class, 'create'])->name('imports.create');

@@ -31,6 +31,11 @@
         'source-deleted' => 'Income source deleted successfully.',
         'payment-added' => 'Payment recorded successfully.',
         'payment-deleted' => 'Payment removed.',
+        'recurring-created' => 'Recurring expense saved.',
+        'recurring-updated' => 'Recurring expense updated.',
+        'recurring-deleted' => 'Recurring expense removed.',
+        'recurring-posted' => 'Added to this month\'s expenses.',
+        'recurring-already-posted' => 'This expense was already added this month.',
         'profile-updated' => 'Profile updated.',
         'password-updated' => 'Password updated.',
     ];

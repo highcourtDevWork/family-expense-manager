@@ -28,6 +28,28 @@
 
     <x-flash />
 
+    @if ($loan->is_emi && $emiStats)
+        {{-- EMI overview --}}
+        <div class="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div class="rounded-lg bg-white p-5 shadow-sm">
+                <p class="text-sm font-medium text-gray-500">Interest Rate</p>
+                <p class="mt-1 text-xl font-bold text-gray-800">{{ number_format((float) $loan->interest_rate, 2) }}%</p>
+            </div>
+            <div class="rounded-lg bg-white p-5 shadow-sm">
+                <p class="text-sm font-medium text-gray-500">Remaining Tenure</p>
+                <p class="mt-1 text-xl font-bold text-gray-800">{{ $emiStats['pendingCount'] }} / {{ $loan->tenure_months }} mo</p>
+            </div>
+            <div class="rounded-lg bg-white p-5 shadow-sm">
+                <p class="text-sm font-medium text-gray-500">Total Payable</p>
+                <p class="mt-1 text-xl font-bold text-gray-800">₹{{ number_format($emiStats['totalPayable'], 2) }}</p>
+            </div>
+            <div class="rounded-lg bg-white p-5 shadow-sm">
+                <p class="text-sm font-medium text-gray-500">Total Paid</p>
+                <p class="mt-1 text-xl font-bold text-emerald-600">₹{{ number_format($emiStats['totalPaid'], 2) }}</p>
+            </div>
+        </div>
+    @endif
+
     {{-- Summary --}}
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div class="rounded-lg bg-white p-5 shadow-sm">
@@ -60,6 +82,7 @@
         </dl>
     </div>
 
+    @unless ($loan->is_emi)
     <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         {{-- Add payment --}}
         @can('update', $loan)
@@ -135,4 +158,47 @@
             </div>
         </div>
     </div>
+    @else
+        {{-- EMI amortization schedule --}}
+        <div class="mt-6 rounded-lg bg-white shadow-sm">
+            <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+                <h3 class="text-sm font-semibold text-gray-700">EMI Schedule</h3>
+                <span class="text-xs text-gray-500">Installments auto-post on their due date.</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        <tr>
+                            <th class="px-5 py-3">#</th>
+                            <th class="px-5 py-3">Due Date</th>
+                            <th class="px-5 py-3 text-right">EMI</th>
+                            <th class="px-5 py-3 text-right">Principal</th>
+                            <th class="px-5 py-3 text-right">Interest</th>
+                            <th class="px-5 py-3 text-right">Balance</th>
+                            <th class="px-5 py-3 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach ($emis as $emi)
+                            <tr class="{{ $emi->status === \App\Enums\EmiStatus::Paid ? '' : 'bg-amber-50/40' }}">
+                                <td class="px-5 py-2 text-gray-500">{{ $emi->sequence }}</td>
+                                <td class="whitespace-nowrap px-5 py-2 text-gray-700">{{ $emi->due_date->format('d M Y') }}</td>
+                                <td class="whitespace-nowrap px-5 py-2 text-right font-medium text-gray-900">₹{{ number_format((float) $emi->emi_amount, 2) }}</td>
+                                <td class="whitespace-nowrap px-5 py-2 text-right text-gray-600">₹{{ number_format((float) $emi->principal_component, 2) }}</td>
+                                <td class="whitespace-nowrap px-5 py-2 text-right text-gray-600">₹{{ number_format((float) $emi->interest_component, 2) }}</td>
+                                <td class="whitespace-nowrap px-5 py-2 text-right text-gray-600">₹{{ number_format((float) $emi->closing_balance, 2) }}</td>
+                                <td class="px-5 py-2 text-center">
+                                    <span @class([
+                                        'inline-flex rounded-full px-2 py-0.5 text-xs font-medium',
+                                        'bg-emerald-50 text-emerald-700' => $emi->status === \App\Enums\EmiStatus::Paid,
+                                        'bg-gray-100 text-gray-500' => $emi->status !== \App\Enums\EmiStatus::Paid,
+                                    ])>{{ $emi->status->label() }}</span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endunless
 </x-app-layout>
