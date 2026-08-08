@@ -163,7 +163,7 @@
         <div class="mt-6 rounded-lg bg-white shadow-sm">
             <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
                 <h3 class="text-sm font-semibold text-gray-700">EMI Schedule</h3>
-                <span class="text-xs text-gray-500">Installments auto-post on their due date.</span>
+                <span class="text-xs text-gray-500">Auto-posts on day {{ $loan->emi_due_day }} of each month · you can also mark manually.</span>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
@@ -176,6 +176,7 @@
                             <th class="px-5 py-3 text-right">Interest</th>
                             <th class="px-5 py-3 text-right">Balance</th>
                             <th class="px-5 py-3 text-center">Status</th>
+                            @can('update', $loan)<th class="px-5 py-3 text-right">Action</th>@endcan
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -194,6 +195,27 @@
                                         'bg-gray-100 text-gray-500' => $emi->status !== \App\Enums\EmiStatus::Paid,
                                     ])>{{ $emi->status->label() }}</span>
                                 </td>
+                                @can('update', $loan)
+                                    <td class="whitespace-nowrap px-5 py-2 text-right">
+                                        @if ($emi->status === \App\Enums\EmiStatus::Pending)
+                                            <form method="POST" action="{{ route('loans.emis.pay', [$loan, $emi]) }}">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="rounded-lg bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100">
+                                                    Mark paid
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form method="POST" action="{{ route('loans.emis.unpay', [$loan, $emi]) }}"
+                                                onsubmit="return confirm('Revert this installment to pending?');">
+                                                @csrf
+                                                <button type="submit" class="text-xs text-gray-500 hover:text-gray-700 hover:underline">
+                                                    Undo
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </td>
+                                @endcan
                             </tr>
                         @endforeach
                     </tbody>

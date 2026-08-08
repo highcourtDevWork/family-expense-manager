@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApiCredentialController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DebtController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\FamilyMemberController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\IncomeSourceController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\LoanEmiController;
 use App\Http\Controllers\LoanPaymentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -40,6 +42,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('loans', LoanController::class);
     Route::post('/loans/{loan}/payments', [LoanPaymentController::class, 'store'])->name('loans.payments.store');
     Route::delete('/loans/{loan}/payments/{payment}', [LoanPaymentController::class, 'destroy'])->name('loans.payments.destroy');
+    // Manually mark an EMI installment paid / revert it to pending.
+    Route::post('/loans/{loan}/emis/{emi}/pay', [LoanEmiController::class, 'pay'])->name('loans.emis.pay');
+    Route::post('/loans/{loan}/emis/{emi}/unpay', [LoanEmiController::class, 'unpay'])->name('loans.emis.unpay');
 
     // Debts and their nested payments.
     Route::resource('debts', DebtController::class);
@@ -88,6 +93,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/income-sources', [IncomeSourceController::class, 'store'])->name('sources.store');
     Route::put('/settings/income-sources/{source}', [IncomeSourceController::class, 'update'])->name('sources.update');
     Route::delete('/settings/income-sources/{source}', [IncomeSourceController::class, 'destroy'])->name('sources.destroy');
+
+    // API access — issue and delete API key / secret pairs.
+    Route::get('/settings/api-keys', [ApiCredentialController::class, 'index'])->name('api-keys.index');
+    Route::post('/settings/api-keys', [ApiCredentialController::class, 'store'])->name('api-keys.store');
+    Route::delete('/settings/api-keys/{apiKey}', [ApiCredentialController::class, 'destroy'])->name('api-keys.destroy');
 
     // In-app notifications (loan reminders, expense warnings).
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

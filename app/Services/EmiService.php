@@ -156,6 +156,40 @@ class EmiService
     }
 
     /**
+     * Manually mark a single installment as paid (dated today) and refresh the
+     * loan's derived totals. Used by the "Mark as paid" action.
+     */
+    public function markPaid(LoanEmi $emi): void
+    {
+        if ($emi->status === EmiStatus::Paid) {
+            return;
+        }
+
+        DB::transaction(function () use ($emi): void {
+            $emi->update(['status' => EmiStatus::Paid, 'paid_on' => Carbon::today()]);
+
+            $this->loanService->recalculate($emi->loan);
+        });
+    }
+
+    /**
+     * Revert an installment back to pending (undo an accidental payment) and
+     * refresh the loan's derived totals.
+     */
+    public function markPending(LoanEmi $emi): void
+    {
+        if ($emi->status === EmiStatus::Pending) {
+            return;
+        }
+
+        DB::transaction(function () use ($emi): void {
+            $emi->update(['status' => EmiStatus::Pending, 'paid_on' => null]);
+
+            $this->loanService->recalculate($emi->loan);
+        });
+    }
+
+    /**
      * Display figures for an EMI loan, derived from its schedule.
      *
      * @return array{

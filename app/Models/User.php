@@ -42,6 +42,14 @@ class User extends Authenticatable
     }
 
     /**
+     * API credentials (key + hashed secret) issued to this user.
+     */
+    public function apiCredentials(): HasMany
+    {
+        return $this->hasMany(ApiCredential::class);
+    }
+
+    /**
      * Families this user belongs to, with role/relationship pivot data.
      */
     public function families(): BelongsToMany

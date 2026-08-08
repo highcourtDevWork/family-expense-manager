@@ -26,6 +26,11 @@
             <p class="mt-1 text-sm text-gray-500">Rent, internet, bills — add them monthly with one click.</p>
         </a>
 
+        <a href="{{ route('api-keys.index') }}" class="rounded-lg bg-white p-6 shadow-sm transition hover:shadow-md">
+            <h3 class="font-semibold text-gray-800">API Access</h3>
+            <p class="mt-1 text-sm text-gray-500">Generate an API key & secret for programmatic access.</p>
+        </a>
+
         <a href="{{ route('family.index') }}" class="rounded-lg bg-white p-6 shadow-sm transition hover:shadow-md">
             <h3 class="font-semibold text-gray-800">Family Members</h3>
             <p class="mt-1 text-sm text-gray-500">{{ $family?->name }} — manage members and roles.</p>
