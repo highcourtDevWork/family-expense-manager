@@ -15,6 +15,7 @@ use App\Http\Controllers\LoanPaymentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RecurringExpenseController;
+use App\Http\Controllers\RecurringIncomeController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SavingController;
 use App\Http\Controllers\SettingsController;
@@ -57,6 +58,10 @@ Route::middleware('auth')->group(function () {
     // Recurring expense templates + the one-click "add to this month" action.
     Route::resource('recurring', RecurringExpenseController::class)->except('show')->parameters(['recurring' => 'recurring']);
     Route::post('/recurring/{recurring}/post', [RecurringExpenseController::class, 'post'])->name('recurring.post');
+
+    // Recurring income templates (e.g. salaries) + one-click "add to this month".
+    Route::resource('recurring-incomes', RecurringIncomeController::class)->except('show');
+    Route::post('/recurring-incomes/{recurring_income}/post', [RecurringIncomeController::class, 'post'])->name('recurring-incomes.post');
 
     // Google Pay statement import: upload -> preview -> confirm.
     Route::get('/imports/gpay', [StatementImportController::class, 'create'])->name('imports.create');

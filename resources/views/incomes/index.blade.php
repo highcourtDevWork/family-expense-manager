@@ -3,6 +3,10 @@
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold text-gray-800">Income</h2>
             <div class="flex items-center gap-2">
+                <a href="{{ route('recurring-incomes.index') }}"
+                    class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                    Recurring
+                </a>
                 <a href="{{ route('incomes.report') }}"
                     class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
                     Monthly Report

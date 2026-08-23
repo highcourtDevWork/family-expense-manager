@@ -16,3 +16,4 @@ Schedule::command('expenses:warn')->weeklyOn(1, '09:00');
 // templates flagged for auto-posting are created on the 1st of each month.
 Schedule::command('emis:post')->dailyAt('01:00');
 Schedule::command('recurring:post')->monthlyOn(1, '02:00');
+Schedule::command('recurring-incomes:post')->monthlyOn(1, '02:05');
