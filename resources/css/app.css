@@ -12,3 +12,63 @@
 [x-cloak] {
     display: none !important;
 }
+
+/* ---------------------------------------------------------------------------
+   Mobile-native feel. Scoped mostly to touch/small viewports so the desktop
+   experience is unchanged.
+   --------------------------------------------------------------------------- */
+
+html {
+    /* Stop iOS/Android from auto-inflating text on orientation change. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    /* Momentum scrolling + stop the whole page rubber-banding past its edges. */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
+}
+
+/* No grey flash on tap; we supply our own press feedback via .tap-active. */
+a,
+button,
+[role='button'],
+.tap-active {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* App-like press feedback: a subtle shrink while the control is held. */
+.tap-active {
+    transition: transform 0.06s ease, background-color 0.12s ease;
+}
+.tap-active:active {
+    transform: scale(0.97);
+}
+
+/* Safe-area helpers for the notch and home indicator (needs viewport-fit=cover). */
+.pt-safe {
+    padding-top: env(safe-area-inset-top);
+}
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (max-width: 1023px) {
+    /* A font-size below 16px makes iOS Safari zoom the page when a field is
+       focused, which shifts the layout. Keep form controls at 16px on mobile. */
+    input:not([type='checkbox']):not([type='radio']),
+    select,
+    textarea {
+        font-size: 16px;
+    }
+}
+
+/* Slide the bottom tab bar out of the way while the keyboard is open, so it
+   doesn't sit on top of the input. Toggled by the focusin/out handler in app.js. */
+.bottom-nav {
+    transition: transform 0.2s ease;
+}
+body.kb-open .bottom-nav {
+    transform: translateY(150%);
+}

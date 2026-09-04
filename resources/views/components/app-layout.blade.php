@@ -2,14 +2,18 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {{-- viewport-fit=cover exposes the safe-area insets; interactive-widget keeps
+             the layout from jumping when the on-screen keyboard opens. --}}
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+        <meta name="theme-color" content="#059669">
         <title>{{ $title ?? config('app.name') }}</title>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="min-h-screen bg-gray-50 font-sans text-gray-900 antialiased">
+    <body class="min-h-[100dvh] bg-gray-50 font-sans text-gray-900 antialiased">
         @php
-            // route name => [label, icon, active-pattern]
+            // route name => [label, icon, active-pattern] — desktop sidebar.
             $navLinks = [
                 'dashboard' => ['Dashboard', 'dashboard', 'dashboard'],
                 'expenses.index' => ['Expenses', 'expenses', 'expenses.*'],
@@ -22,26 +26,16 @@
                 'imports.create' => ['Import', 'import', 'imports.*'],
                 'settings.index' => ['Settings', 'settings', 'settings.*'],
             ];
+            $unread = auth()->user()->unreadNotifications()->count();
         @endphp
 
-        <div x-data="{ sidebarOpen: false }" class="min-h-screen lg:flex">
-            {{-- Mobile overlay --}}
-            <div x-show="sidebarOpen" x-transition.opacity @click="sidebarOpen = false"
-                class="fixed inset-0 z-30 bg-gray-900/40 lg:hidden" style="display: none;"></div>
-
-            {{-- Sidebar --}}
-            <aside
-                class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-gray-200 bg-white transition-transform lg:static lg:translate-x-0"
-                :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
-                <div class="flex h-16 items-center justify-between border-b border-gray-200 px-5">
+        <div class="min-h-[100dvh] lg:flex">
+            {{-- Desktop sidebar (hidden on mobile/tablet, which use the bottom tab bar) --}}
+            <aside class="hidden w-64 flex-col border-r border-gray-200 bg-white lg:flex">
+                <div class="flex h-16 items-center border-b border-gray-200 px-5">
                     <a href="{{ route('dashboard') }}">
                         <x-application-logo class="text-base" />
                     </a>
-                    <button type="button" @click="sidebarOpen = false" class="text-gray-400 hover:text-gray-600 lg:hidden" aria-label="Close menu">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
                 </div>
 
                 <nav class="flex-1 space-y-1 overflow-y-auto p-4">
@@ -53,7 +47,6 @@
                 </nav>
 
                 <div class="border-t border-gray-200 p-4">
-                    @php $unread = auth()->user()->unreadNotifications()->count(); @endphp
                     <a href="{{ route('notifications.index') }}"
                         class="mb-1 flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
                         <span class="flex items-center gap-3">
@@ -91,28 +84,39 @@
 
             {{-- Main column --}}
             <div class="flex min-w-0 flex-1 flex-col">
-                {{-- Mobile top bar --}}
-                <div class="flex h-16 items-center gap-3 border-b border-gray-200 bg-white px-4 lg:hidden">
-                    <button type="button" @click="sidebarOpen = true" class="text-gray-500 hover:text-gray-700" aria-label="Open menu">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
-                    <x-application-logo class="text-sm" />
-                </div>
+                {{-- Mobile app bar (WhatsApp-style green header) --}}
+                <header class="pt-safe sticky top-0 z-20 bg-emerald-600 text-white lg:hidden">
+                    <div class="flex h-14 items-center justify-between px-4">
+                        <a href="{{ route('dashboard') }}" class="text-lg font-semibold tracking-tight">
+                            {{ config('app.name') }}
+                        </a>
+                        <a href="{{ route('notifications.index') }}" class="tap-active relative -mr-2 p-2" aria-label="Notifications">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9" />
+                            </svg>
+                            @if ($unread > 0)
+                                <span class="absolute right-1 top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">{{ $unread }}</span>
+                            @endif
+                        </a>
+                    </div>
+                </header>
 
+                {{-- Per-page header slot (kept for both breakpoints so page actions stay reachable) --}}
                 @if (isset($header))
-                    <header class="border-b border-gray-200 bg-white">
-                        <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+                    <div class="border-b border-gray-200 bg-white">
+                        <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 lg:py-5">
                             {{ $header }}
                         </div>
-                    </header>
+                    </div>
                 @endif
 
-                <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+                <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:py-8 lg:pb-8">
                     {{ $slot }}
                 </main>
             </div>
+
+            {{-- Mobile bottom tab bar + "More" sheet --}}
+            <x-bottom-nav :unread="$unread" />
         </div>
     </body>
 </html>
