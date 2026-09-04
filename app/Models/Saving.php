@@ -22,6 +22,7 @@ class Saving extends Model
         'amount',
         'notes',
         'date',
+        'reference',
     ];
 
     /**

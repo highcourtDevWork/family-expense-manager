@@ -17,3 +17,4 @@ Schedule::command('expenses:warn')->weeklyOn(1, '09:00');
 Schedule::command('emis:post')->dailyAt('01:00');
 Schedule::command('recurring:post')->monthlyOn(1, '02:00');
 Schedule::command('recurring-incomes:post')->monthlyOn(1, '02:05');
+Schedule::command('recurring-savings:post')->monthlyOn(1, '02:10');

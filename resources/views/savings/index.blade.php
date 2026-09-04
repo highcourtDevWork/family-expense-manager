@@ -2,10 +2,16 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold text-gray-800">Savings</h2>
-            <a href="{{ route('savings.create') }}"
-                class="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
-                + Add Saving
-            </a>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('recurring-savings.index') }}"
+                    class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                    Recurring
+                </a>
+                <a href="{{ route('savings.create') }}"
+                    class="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                    + Add Saving
+                </a>
+            </div>
         </div>
     </x-slot>
 

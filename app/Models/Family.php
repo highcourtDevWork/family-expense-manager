@@ -90,4 +90,9 @@ class Family extends Model
     {
         return $this->hasMany(RecurringIncome::class);
     }
+
+    public function recurringSavings(): HasMany
+    {
+        return $this->hasMany(RecurringSaving::class);
+    }
 }
