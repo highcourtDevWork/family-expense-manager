@@ -15,14 +15,16 @@ use Illuminate\Support\Collection;
 class DashboardService
 {
     /**
-     * The summary cards shown at the top of the dashboard for a given month.
+     * The summary cards shown at the top of the dashboard for a date range.
+     * With no range given it defaults to the current month. Loan/debt/savings
+     * are point-in-time balances and are not range-scoped.
      *
-     * @return array{income: string, expense: string, balance: string, month: Carbon}
+     * @return array{income: string, expense: string, balance: string, loanBalance: string, debtOwed: string, savings: string, start: Carbon, end: Carbon, month: Carbon}
      */
-    public function summary(Family $family, ?Carbon $month = null): array
+    public function summary(Family $family, ?Carbon $start = null, ?Carbon $end = null): array
     {
-        $month ??= Carbon::now()->startOfMonth();
-        [$start, $end] = $this->monthRange($month);
+        $start ??= Carbon::now()->startOfMonth();
+        $end ??= $start->copy()->endOfMonth();
 
         $income = Income::query()->forFamily($family->id)
             ->whereBetween('income_date', [$start, $end])
@@ -39,7 +41,10 @@ class DashboardService
             'loanBalance' => $this->totalLoanBalance($family),
             'debtOwed' => $this->netDebtOwed($family),
             'savings' => $this->totalSavings($family),
-            'month' => $month->copy(),
+            'start' => $start->copy(),
+            'end' => $end->copy(),
+            // Kept for the API/back-compat; equals the range's starting month.
+            'month' => $start->copy(),
         ];
     }
 
@@ -82,10 +87,10 @@ class DashboardService
      *
      * @return Collection<int, array{name: string, total: float}>
      */
-    public function spendingByCategory(Family $family, ?Carbon $month = null): Collection
+    public function spendingByCategory(Family $family, ?Carbon $start = null, ?Carbon $end = null): Collection
     {
-        $month ??= Carbon::now()->startOfMonth();
-        [$start, $end] = $this->monthRange($month);
+        $start ??= Carbon::now()->startOfMonth();
+        $end ??= $start->copy()->endOfMonth();
 
         return Expense::query()->forFamily($family->id)
             ->with('category')
@@ -106,9 +111,10 @@ class DashboardService
      *
      * @return Collection<int, array{label: string, income: float, expense: float}>
      */
-    public function monthlyTrend(Family $family, int $months = 6): Collection
+    public function monthlyTrend(Family $family, int $months = 6, ?Carbon $endMonth = null): Collection
     {
-        $start = Carbon::now()->startOfMonth()->subMonths($months - 1);
+        $anchor = ($endMonth ?? Carbon::now())->copy()->startOfMonth();
+        $start = $anchor->copy()->subMonths($months - 1);
 
         // Pull raw monthly sums keyed by "YYYY-MM", then stitch a complete,
         // gap-free series so months with no activity still render as zero.
@@ -149,13 +155,5 @@ class DashboardService
     private function sumByMonth(Collection $raw): array
     {
         return $raw->map(fn ($total): float => (float) $total)->all();
-    }
-
-    /**
-     * @return array{0: Carbon, 1: Carbon}
-     */
-    private function monthRange(Carbon $month): array
-    {
-        return [$month->copy()->startOfMonth(), $month->copy()->endOfMonth()];
     }
 }

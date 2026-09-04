@@ -30,7 +30,30 @@ class DashboardPageTest extends TestCase
         $this->actingAs($user)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('This Month Income')
+            ->assertSee('This month')        // default period preset in the filter
             ->assertSee('Total Loan Balance');
+    }
+
+    public function test_a_custom_date_range_scopes_the_summary(): void
+    {
+        $user = User::factory()->create();
+        $family = app(FamilyService::class)->createForUser($user);
+        $category = $family->categories()->first();
+
+        Expense::factory()->for($family)->create([
+            'user_id' => $user->id, 'expense_category_id' => $category->id,
+            'expense_date' => '2026-03-15', 'amount' => 700,
+        ]);
+        // Outside the requested window — must be excluded.
+        Expense::factory()->for($family)->create([
+            'user_id' => $user->id, 'expense_category_id' => $category->id,
+            'expense_date' => '2026-05-01', 'amount' => 999,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('dashboard', ['period' => 'custom', 'date_from' => '2026-03-01', 'date_to' => '2026-03-31']))
+            ->assertOk()
+            ->assertSee('01 Mar 2026 – 31 Mar 2026')
+            ->assertSee('700');
     }
 }
