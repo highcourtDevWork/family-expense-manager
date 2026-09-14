@@ -90,7 +90,7 @@ class RecurringIncomeTest extends TestCase
         // Each salary is attributed to its earner, not to whoever posted it.
         $this->assertDatabaseHas('incomes', [
             'family_id' => $family->id, 'user_id' => $me->id, 'amount' => 90000, 'notes' => 'My Salary',
-            'reference' => 'recurring-income:'.$mine->id.':2026-07', 'income_date' => '2026-07-01 00:00:00',
+            'reference' => 'recurring-income:'.$mine->id.':2026-07', 'income_date' => '2026-07-01',
         ]);
         $this->assertDatabaseHas('incomes', [
             'family_id' => $family->id, 'user_id' => $wife->id, 'amount' => 70000, 'notes' => "Wife's Salary",

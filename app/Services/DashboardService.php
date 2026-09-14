@@ -121,7 +121,7 @@ class DashboardService
         $incomeByMonth = $this->sumByMonth(
             Income::query()->forFamily($family->id)
                 ->where('income_date', '>=', $start)
-                ->selectRaw("strftime('%Y-%m', income_date) as ym, SUM(amount) as total")
+                ->selectRaw("DATE_FORMAT(income_date, '%Y-%m') as ym, SUM(amount) as total")
                 ->groupBy('ym')
                 ->pluck('total', 'ym')
         );
@@ -129,7 +129,7 @@ class DashboardService
         $expenseByMonth = $this->sumByMonth(
             Expense::query()->forFamily($family->id)
                 ->where('expense_date', '>=', $start)
-                ->selectRaw("strftime('%Y-%m', expense_date) as ym, SUM(amount) as total")
+                ->selectRaw("DATE_FORMAT(expense_date, '%Y-%m') as ym, SUM(amount) as total")
                 ->groupBy('ym')
                 ->pluck('total', 'ym')
         );

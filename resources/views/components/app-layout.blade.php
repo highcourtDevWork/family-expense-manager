@@ -26,6 +26,17 @@
                 'imports.create' => ['Import', 'import', 'imports.*'],
                 'settings.index' => ['Settings', 'settings', 'settings.*'],
             ];
+
+            // Bachelor Split accounts get their shared-expense destinations,
+            // inserted right after Dashboard.
+            if (auth()->user()?->currentFamily()?->isBachelor()) {
+                $bachelorLinks = [
+                    'bachelor.splits.index' => ['Shared Expenses', 'expenses', 'bachelor.splits.*'],
+                    'bachelor.members.index' => ['Roommates', 'family', 'bachelor.members.*'],
+                ];
+                $navLinks = array_slice($navLinks, 0, 1, true) + $bachelorLinks + array_slice($navLinks, 1, null, true);
+            }
+
             $unread = auth()->user()->unreadNotifications()->count();
         @endphp
 

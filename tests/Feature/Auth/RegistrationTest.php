@@ -26,6 +26,7 @@ class RegistrationTest extends TestCase
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'account_type' => 'family',
         ]);
 
         $this->assertAuthenticated();
@@ -39,6 +40,7 @@ class RegistrationTest extends TestCase
             'email' => 'kumar@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'account_type' => 'family',
         ]);
 
         $user = User::firstWhere('email', 'kumar@example.com');
@@ -57,6 +59,7 @@ class RegistrationTest extends TestCase
             'email' => 'kumar@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'account_type' => 'family',
         ]);
 
         $family = User::firstWhere('email', 'kumar@example.com')->currentFamily();

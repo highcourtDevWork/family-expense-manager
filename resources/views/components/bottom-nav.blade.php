@@ -19,7 +19,16 @@
         ['label' => 'Settings', 'route' => 'settings.index', 'pattern' => 'settings.*', 'icon' => 'M10.3 4.3a1 1 0 0 1 3.4 0l.2.9a1 1 0 0 0 1.4.8l.8-.4a1 1 0 0 1 1.3 1.4l-.4.8a1 1 0 0 0 .8 1.4l.9.2a1 1 0 0 1 0 3.4l-.9.2a1 1 0 0 0-.8 1.4l.4.8a1 1 0 0 1-1.3 1.3l-.8-.4a1 1 0 0 0-1.4.8l-.2.9a1 1 0 0 1-3.4 0l-.2-.9a1 1 0 0 0-1.4-.8l-.8.4a1 1 0 0 1-1.3-1.3l.4-.8a1 1 0 0 0-.8-1.4l-.9-.2a1 1 0 0 1 0-3.4l.9-.2a1 1 0 0 0 .8-1.4l-.4-.8a1 1 0 0 1 1.3-1.4l.8.4a1 1 0 0 0 1.4-.8zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'],
     ];
 
-    $moreActive = request()->routeIs('loans.*', 'debts.*', 'savings.*', 'family.*', 'imports.*', 'settings.*', 'notifications.*', 'profile.*', 'recurring.*', 'recurring-incomes.*', 'api-keys.*');
+    // Bachelor Split accounts get their shared-expense destinations up front.
+    if (auth()->user()?->currentFamily()?->isBachelor()) {
+        array_unshift(
+            $moreItems,
+            ['label' => 'Shared', 'route' => 'bachelor.splits.index', 'pattern' => 'bachelor.splits.*', 'icon' => 'M3 6h18M3 12h18M3 18h12'],
+            ['label' => 'Roommates', 'route' => 'bachelor.members.index', 'pattern' => 'bachelor.members.*', 'icon' => 'M17 20h5v-1a4 4 0 0 0-3-3.87M9 20H4v-1a4 4 0 0 1 3-3.87m6-1a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'],
+        );
+    }
+
+    $moreActive = request()->routeIs('loans.*', 'debts.*', 'savings.*', 'family.*', 'imports.*', 'settings.*', 'notifications.*', 'profile.*', 'recurring.*', 'recurring-incomes.*', 'api-keys.*', 'bachelor.*');
 @endphp
 
 <div x-data="{ moreOpen: false }" class="lg:hidden">

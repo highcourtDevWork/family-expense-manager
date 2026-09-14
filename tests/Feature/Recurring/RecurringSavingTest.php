@@ -94,7 +94,7 @@ class RecurringSavingTest extends TestCase
         $this->assertDatabaseHas('savings', [
             'family_id' => $family->id, 'user_id' => $me->id, 'amount' => 15000, 'notes' => 'My SIP',
             'saving_type' => SavingType::Mutual->value,
-            'reference' => 'recurring-saving:'.$mine->id.':2026-07', 'date' => '2026-07-01 00:00:00',
+            'reference' => 'recurring-saving:'.$mine->id.':2026-07', 'date' => '2026-07-01',
         ]);
         $this->assertDatabaseHas('savings', [
             'family_id' => $family->id, 'user_id' => $wife->id, 'amount' => 8000, 'notes' => 'Gold Plan',

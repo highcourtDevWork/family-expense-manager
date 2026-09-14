@@ -139,7 +139,7 @@ class ReportService
     {
         return $query
             ->whereYear($dateColumn, $year)
-            ->selectRaw("CAST(strftime('%m', $dateColumn) AS INTEGER) as m, SUM(amount) as total")
+            ->selectRaw("MONTH($dateColumn) as m, SUM(amount) as total")
             ->groupBy('m')
             ->pluck('total', 'm')
             ->map(fn ($total): float => (float) $total)

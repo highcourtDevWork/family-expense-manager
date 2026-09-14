@@ -16,6 +16,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RecurringExpenseController;
 use App\Http\Controllers\RecurringIncomeController;
+use App\Http\Controllers\Bachelor\BachelorMemberController;
+use App\Http\Controllers\Bachelor\SplitExpenseController;
 use App\Http\Controllers\RecurringSavingController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SavingController;
@@ -67,6 +69,20 @@ Route::middleware('auth')->group(function () {
     // Recurring savings templates (e.g. SIPs) + one-click "add to this month".
     Route::resource('recurring-savings', RecurringSavingController::class)->except('show');
     Route::post('/recurring-savings/{recurring_saving}/post', [RecurringSavingController::class, 'post'])->name('recurring-savings.post');
+
+    // Bachelor Split: shared household expenses, member logins, and settlements.
+    // Gated so only accounts running in Bachelor Split mode can reach them.
+    Route::middleware('bachelor')->prefix('bachelor')->name('bachelor.')->group(function () {
+        Route::get('/splits', [SplitExpenseController::class, 'index'])->name('splits.index');
+        Route::get('/splits/create', [SplitExpenseController::class, 'create'])->name('splits.create');
+        Route::post('/splits', [SplitExpenseController::class, 'store'])->name('splits.store');
+        Route::post('/splits/shares/{share}/settle', [SplitExpenseController::class, 'settle'])->name('splits.settle');
+        Route::post('/splits/shares/{share}/unsettle', [SplitExpenseController::class, 'unsettle'])->name('splits.unsettle');
+
+        Route::get('/members', [BachelorMemberController::class, 'index'])->name('members.index');
+        Route::post('/members', [BachelorMemberController::class, 'store'])->name('members.store');
+        Route::delete('/members/{member}', [BachelorMemberController::class, 'destroy'])->name('members.destroy');
+    });
 
     // Google Pay statement import: upload -> preview -> confirm.
     Route::get('/imports/gpay', [StatementImportController::class, 'create'])->name('imports.create');

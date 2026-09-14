@@ -71,7 +71,7 @@ class RecurringExpenseTest extends TestCase
             'description' => 'Internet Bill',
             'amount' => 1200,
             'reference' => 'recurring:'.$template->id.':2026-07',
-            'expense_date' => '2026-07-01 00:00:00',
+            'expense_date' => '2026-07-01',
         ]);
     }
 

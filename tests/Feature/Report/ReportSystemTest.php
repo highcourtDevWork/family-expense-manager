@@ -90,10 +90,10 @@ class ReportSystemTest extends TestCase
 
         $report = app(ReportService::class)->monthly($family, Carbon::parse('2026-07-01'));
 
-        $this->assertSame('50000', $report['income']);
-        $this->assertSame('20000', $report['expense']);
+        $this->assertSame('50000.00', $report['income']);
+        $this->assertSame('20000.00', $report['expense']);
         $this->assertSame('30000', $report['balance']);
-        $this->assertSame('8000', $report['savings']);
+        $this->assertSame('8000.00', $report['savings']);
     }
 
     public function test_the_yearly_report_breaks_down_by_month(): void

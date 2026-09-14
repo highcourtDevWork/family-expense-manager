@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\AccountType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Models\User;
@@ -31,9 +32,12 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->validated('password')),
         ]);
 
-        // Every new user starts as the admin of their own family, pre-seeded
-        // with the default expense categories.
-        $this->familyService->createForUser($user);
+        // Every new user starts as the admin of their own workspace, of the
+        // account type they chose at signup, pre-seeded with default categories.
+        $this->familyService->createForUser(
+            $user,
+            accountType: AccountType::from($request->validated('account_type')),
+        );
 
         event(new Registered($user));
 

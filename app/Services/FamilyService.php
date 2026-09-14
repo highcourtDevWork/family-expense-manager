@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\AccountType;
 use App\Enums\FamilyRole;
 use App\Enums\Relationship;
 use App\Models\Family;
@@ -44,11 +45,12 @@ class FamilyService
      * Create a family owned by the given user, register them as its admin,
      * and seed the default expense categories — all atomically.
      */
-    public function createForUser(User $user, ?string $name = null): Family
+    public function createForUser(User $user, ?string $name = null, AccountType $accountType = AccountType::Family): Family
     {
-        return DB::transaction(function () use ($user, $name): Family {
+        return DB::transaction(function () use ($user, $name, $accountType): Family {
             $family = Family::create([
-                'name' => $name ?: $user->name."'s Family",
+                'name' => $name ?: $accountType->defaultWorkspaceName($user->name),
+                'account_type' => $accountType,
                 'created_by' => $user->id,
             ]);
 

@@ -68,8 +68,8 @@ class DashboardServiceTest extends TestCase
 
         $summary = $this->service->summary($family);
 
-        $this->assertSame('50000', $summary['income']);
-        $this->assertSame('20000', $summary['expense']);
+        $this->assertSame('50000.00', $summary['income']);
+        $this->assertSame('20000.00', $summary['expense']);
         $this->assertSame('30000', $summary['balance']);
     }
 

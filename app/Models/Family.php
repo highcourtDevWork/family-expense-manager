@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AccountType;
 use Database\Factories\FamilyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,8 +18,34 @@ class Family extends Model
 
     protected $fillable = [
         'name',
+        'account_type',
         'created_by',
     ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'account_type' => AccountType::class,
+        ];
+    }
+
+    public function isFamily(): bool
+    {
+        return $this->account_type === AccountType::Family;
+    }
+
+    public function isBachelor(): bool
+    {
+        return $this->account_type === AccountType::Bachelor;
+    }
+
+    public function isIndividual(): bool
+    {
+        return $this->account_type === AccountType::Individual;
+    }
 
     /**
      * The user who created and owns this family.
@@ -94,5 +121,15 @@ class Family extends Model
     public function recurringSavings(): HasMany
     {
         return $this->hasMany(RecurringSaving::class);
+    }
+
+    public function splitExpenses(): HasMany
+    {
+        return $this->hasMany(SplitExpense::class);
+    }
+
+    public function splitShares(): HasMany
+    {
+        return $this->hasMany(SplitShare::class);
     }
 }
