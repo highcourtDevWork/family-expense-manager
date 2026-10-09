@@ -8,6 +8,9 @@
         $income = (float) $d['income'];
         $hasIncome = $income > 0;
         $outflow = $d['expenses'] + $d['loans'] + $d['savingsDeposits'];
+        // Show the breakdown whenever there's any activity — not only when there
+        // was income. A month can have loan payments or spending with zero income.
+        $hasActivity = $hasIncome || $outflow > 0;
         $base = max($income, $outflow, 0.01);
         $w = fn ($x) => max(0, round(((float) $x) / $base * 100, 2));
         $money = fn ($x) => '₹' . number_format((float) $x, 2);
@@ -35,22 +38,29 @@
         <span class="ml-auto self-center text-sm font-medium text-gray-500">{{ $rangeLabel }}</span>
     </div>
 
-    @unless ($hasIncome)
+    @unless ($hasActivity)
         <div class="rounded-lg bg-white p-10 text-center shadow-sm">
-            <p class="text-gray-500">No income recorded for this period, so there's nothing to divide up yet.</p>
+            <p class="text-gray-500">No income or spending recorded for this period yet.</p>
             <a href="{{ route('incomes.create') }}" class="mt-2 inline-block text-emerald-700 underline">Add income</a>
         </div>
     @else
         {{-- Headline savings rate --}}
         <div class="mb-6 rounded-lg bg-white p-6 shadow-sm">
             <p class="text-sm font-medium text-gray-500">Savings rate</p>
-            <p class="mt-1 text-4xl font-bold {{ $rate >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
-                {{ number_format($rate, 1) }}%
-            </p>
-            <p class="mt-2 text-sm text-gray-600">
-                You kept <span class="font-semibold text-gray-900">{{ $money($d['saved']) }}</span>
-                of your <span class="font-semibold text-gray-900">{{ $money($income) }}</span> income {{ strtolower($rangeLabel) === 'all time' ? 'across all time' : 'in ' . $rangeLabel }}.
-            </p>
+            @if ($hasIncome)
+                <p class="mt-1 text-4xl font-bold {{ $rate >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
+                    {{ number_format($rate, 1) }}%
+                </p>
+                <p class="mt-2 text-sm text-gray-600">
+                    You kept <span class="font-semibold text-gray-900">{{ $money($d['saved']) }}</span>
+                    of your <span class="font-semibold text-gray-900">{{ $money($income) }}</span> income {{ strtolower($rangeLabel) === 'all time' ? 'across all time' : 'in ' . $rangeLabel }}.
+                </p>
+            @else
+                <p class="mt-1 text-4xl font-bold text-gray-400">—</p>
+                <p class="mt-2 text-sm text-gray-600">
+                    No income recorded {{ strtolower($rangeLabel) === 'all time' ? 'across all time' : 'in ' . $rangeLabel }} — showing where money went below.
+                </p>
+            @endif
             @if ($overspent)
                 <p class="mt-2 rounded-md bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">
                     You spent {{ $money(abs($d['leftover'])) }} more than you earned this period.
@@ -71,7 +81,7 @@
                 @foreach ($rows as [$label, $amount, $pct, $swatch, $textColor])
                     <span class="inline-flex items-center gap-1.5">
                         <span class="h-2.5 w-2.5 rounded-sm {{ $swatch }}"></span>
-                        {{ $label }} — <span class="font-semibold {{ $textColor }}">{{ number_format((float) $pct, 1) }}%</span>
+                        {{ $label }} — <span class="font-semibold {{ $textColor }}">{{ $hasIncome ? number_format((float) $pct, 1) . '%' : $money($amount) }}</span>
                     </span>
                 @endforeach
             </div>
@@ -92,7 +102,7 @@
                         <tr class="bg-emerald-50/40">
                             <td class="px-5 py-3 font-semibold text-gray-800">Income</td>
                             <td class="px-5 py-3 text-right font-semibold text-gray-900">{{ $money($income) }}</td>
-                            <td class="px-5 py-3 text-right font-semibold text-gray-500">100%</td>
+                            <td class="px-5 py-3 text-right font-semibold text-gray-500">{{ $hasIncome ? '100%' : '—' }}</td>
                         </tr>
                         @foreach ($rows as [$label, $amount, $pct, $swatch, $textColor])
                             <tr>
@@ -104,7 +114,7 @@
                                 <td class="px-5 py-3 text-right font-medium {{ $amount < 0 ? 'text-rose-600' : 'text-gray-900' }}">
                                     {{ $money($amount) }}
                                 </td>
-                                <td class="px-5 py-3 text-right text-gray-600">{{ number_format((float) $pct, 1) }}%</td>
+                                <td class="px-5 py-3 text-right text-gray-600">{{ $hasIncome ? number_format((float) $pct, 1) . '%' : '—' }}</td>
                             </tr>
                         @endforeach
                     </tbody>

@@ -103,4 +103,21 @@ class SavingsRateTest extends TestCase
     {
         $this->get(route('savings-rate.index'))->assertRedirect(route('login'));
     }
+
+    public function test_loan_payments_show_even_in_a_month_with_no_income(): void
+    {
+        $user = User::factory()->create();
+        $family = app(FamilyService::class)->createForUser($user);
+        // A manual (non-EMI) loan payment in July, with no income that month.
+        $loan = Loan::factory()->for($family)->create(['user_id' => $user->id]);
+        $loan->payments()->create(['payment_date' => '2026-07-05', 'amount' => 40000]);
+
+        // Default period is "this month" = July 2026 (frozen in setUp).
+        $this->actingAs($user)
+            ->get(route('savings-rate.index'))
+            ->assertOk()
+            ->assertDontSee('No income or spending recorded')
+            ->assertSee('Loan / EMI payments')
+            ->assertSee('40,000.00');
+    }
 }
