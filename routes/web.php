@@ -21,6 +21,7 @@ use App\Http\Controllers\Bachelor\SplitExpenseController;
 use App\Http\Controllers\RecurringSavingController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SavingController;
+use App\Http\Controllers\SavingsRateController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StatementImportController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,9 @@ Route::get('/', function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    // Savings rate: how income is allocated across expenses, loans and savings.
+    Route::get('/savings-rate', SavingsRateController::class)->name('savings-rate.index');
 
     // Bulk delete is declared before the resource so its static path is never
     // mistaken for /expenses/{expense}.

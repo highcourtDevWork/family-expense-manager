@@ -16,6 +16,7 @@
             // route name => [label, icon, active-pattern] — desktop sidebar.
             $navLinks = [
                 'dashboard' => ['Dashboard', 'dashboard', 'dashboard'],
+                'savings-rate.index' => ['Savings Rate', 'savings-rate', 'savings-rate.*'],
                 'expenses.index' => ['Expenses', 'expenses', 'expenses.*'],
                 'incomes.index' => ['Income', 'income', 'incomes.*'],
                 'loans.index' => ['Loans', 'loans', 'loans.*'],

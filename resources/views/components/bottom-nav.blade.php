@@ -11,6 +11,7 @@
     ];
 
     $moreItems = [
+        ['label' => 'Savings %', 'route' => 'savings-rate.index', 'pattern' => 'savings-rate.*', 'icon' => 'M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6z M13.5 3a7.5 7.5 0 0 1 7.5 7.5h-7.5V3z'],
         ['label' => 'Loans', 'route' => 'loans.index', 'pattern' => 'loans.*', 'icon' => 'M3 10l9-6 9 6M4 10v9h16v-9M9 19v-5h6v5'],
         ['label' => 'Debts', 'route' => 'debts.index', 'pattern' => 'debts.*', 'icon' => 'M17 9V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2m2-6h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z'],
         ['label' => 'Savings', 'route' => 'savings.index', 'pattern' => 'savings.*', 'icon' => 'M4 7h16M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2M4 7v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7M9 12h6'],
@@ -28,7 +29,7 @@
         );
     }
 
-    $moreActive = request()->routeIs('loans.*', 'debts.*', 'savings.*', 'family.*', 'imports.*', 'settings.*', 'notifications.*', 'profile.*', 'recurring.*', 'recurring-incomes.*', 'api-keys.*', 'bachelor.*');
+    $moreActive = request()->routeIs('savings-rate.*', 'loans.*', 'debts.*', 'savings.*', 'family.*', 'imports.*', 'settings.*', 'notifications.*', 'profile.*', 'recurring.*', 'recurring-incomes.*', 'api-keys.*', 'bachelor.*');
 @endphp
 
 <div x-data="{ moreOpen: false }" class="lg:hidden">
